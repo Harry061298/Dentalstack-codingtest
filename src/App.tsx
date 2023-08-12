@@ -30,6 +30,7 @@ const App: React.FC = () => {
         console.error("Error fetching data:", error);
       });
   }, [dispatch]);
+  const [addMode, setAddMode] = useState(false);
 
   const [editMode, setEditMode] = useState(false);
   const [editedProduct, setEditedProduct] = useState<Product | null>(null);
@@ -37,6 +38,43 @@ const App: React.FC = () => {
   const handleEdit = (product: Product) => {
     setEditMode(true);
     setEditedProduct(product);
+  };
+
+  const [newProduct, setNewProduct] = useState<Product>({
+    id: 0,
+    title: "",
+    description: "",
+    price: 0
+  });
+
+  const handleAdd = () => {
+    setAddMode(true);
+  };
+
+  const handleAddSave = () => {
+    if (newProduct.title && newProduct.description && newProduct.price > 0) {
+      // Generate a unique ID (replace with your logic)
+      newProduct.id = Date.now();
+
+      dispatch(addProduct(newProduct));
+      setAddMode(false);
+      setNewProduct({
+        id: 0,
+        title: "",
+        description: "",
+        price: 0
+      });
+    }
+  };
+
+  const handleAddCancel = () => {
+    setAddMode(false);
+    setNewProduct({
+      id: 0,
+      title: "",
+      description: "",
+      price: 0
+    });
   };
 
   const handleSave = () => {
@@ -74,6 +112,51 @@ const App: React.FC = () => {
   return (
     <div className="App">
       <h1>Product List</h1>
+      {addMode ? (
+        <div>
+          <h2>Add Product</h2>
+          <div>
+            <label>Title:</label>
+            <input
+              type="text"
+              value={newProduct.title}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, title: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label>Description:</label>
+            <input
+              type="text"
+              value={newProduct.description}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, description: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label>Price:</label>
+            <input
+              type="number"
+              value={newProduct.price}
+              onChange={(e) =>
+                setNewProduct({
+                  ...newProduct,
+                  price: parseFloat(e.target.value)
+                })
+              }
+            />
+          </div>
+          <div>
+            <button onClick={handleAddSave}>Add</button>
+            <button onClick={handleAddCancel}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button onClick={handleAdd}>Add Product</button>
+      )}
+
       <table>
         <thead>
           <tr>
@@ -101,7 +184,7 @@ const App: React.FC = () => {
               </td>
               <td>
                 {editMode && editedProduct?.id === product.id ? (
-                  <textarea
+                  <input
                     value={editedProduct.description}
                     onChange={(e) => handleInputChange(e, "description")}
                   />
